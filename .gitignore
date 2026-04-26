@@ -163,6 +163,7 @@ $RECYCLE.BIN/
 
 # FastAPI / app specific
 app.db
+*.db
 test.db
 
 # Python HTTPX / requests cache
