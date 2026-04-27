@@ -6,7 +6,10 @@ import models
 from database import db_dependency
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/api",
+    tags=["todo"]
+)
 
 
 
@@ -32,11 +35,11 @@ class TodoUpdate(BaseModel):
 
 
 
-@router.get("/api/todos/", status_code=status.HTTP_200_OK, response_model=List[TodoResponse])
+@router.get("/todos/", status_code=status.HTTP_200_OK, response_model=List[TodoResponse])
 def get_todos(db:db_dependency):
     return db.query(models.Todo).all()
 
-@router.post("/api/todos/" , status_code=status.HTTP_201_CREATED, response_model=TodoResponse)
+@router.post("/todos/" , status_code=status.HTTP_201_CREATED, response_model=TodoResponse)
 def create_todo(db:db_dependency, todo: TodoRequest):
     new_todo = models.Todo(**todo.model_dump())
     db.add(new_todo)
@@ -44,14 +47,14 @@ def create_todo(db:db_dependency, todo: TodoRequest):
     db.refresh(new_todo)
     return new_todo
 
-@router.get("/api/todos/{todo_id}", status_code=status.HTTP_200_OK, response_model=TodoResponse)
+@router.get("/todos/{todo_id}", status_code=status.HTTP_200_OK, response_model=TodoResponse)
 def get_todo_by_id(db: db_dependency ,todo_id:int = Path(gt=0)):
     todo = db.get(models.Todo, todo_id)
     if todo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo item not found")
     return todo
 
-@router.delete("/api/todos/{todo_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
+@router.delete("/todos/{todo_id}", status_code=status.HTTP_204_NO_CONTENT, response_model=None)
 def delete_todo_by_id(db: db_dependency, todo_id:int = Path(gt=0)):
     todo = db.get(models.Todo , todo_id)
     if todo is None:
@@ -59,7 +62,7 @@ def delete_todo_by_id(db: db_dependency, todo_id:int = Path(gt=0)):
     db.delete(todo)
     db.commit()
 
-@router.put("/api/todos/{todo_id}", status_code=status.HTTP_200_OK, response_model=TodoResponse)
+@router.put("/todos/{todo_id}", status_code=status.HTTP_200_OK, response_model=TodoResponse)
 def update_todo(db: db_dependency,data: TodoRequest ,todo_id:int = Path(gt=0)):
     todo = db.get(models.Todo, todo_id)
     if todo is None:
@@ -74,7 +77,7 @@ def update_todo(db: db_dependency,data: TodoRequest ,todo_id:int = Path(gt=0)):
     db.refresh(todo)
     return todo
 
-@router.patch("/api/todos/{todo_id}" , status_code=status.HTTP_200_OK, response_model=TodoResponse)
+@router.patch("/todos/{todo_id}" , status_code=status.HTTP_200_OK, response_model=TodoResponse)
 def todo_partial_update(db:db_dependency, data:TodoUpdate, todo_id:int = Path(gt=0)):
     todo = db.get(models.Todo, todo_id)
     if todo is None:
